@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Meeting Cost Summary</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            padding: 16px;
+            background: #FAFBFC;
+        }
+
+        .macro-container {
+            background: white;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 1px 3px rgba(9, 30, 66, 0.1);
+        }
+
+        .macro-header {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 16px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid #EBECF0;
+        }
+
+        .macro-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: #172B4D;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 16px;
+        }
+
+        @media (max-width: 500px) {
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        .stat-item {
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 24px;
+            font-weight: 700;
+            color: #0052CC;
+        }
+
+        .stat-label {
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: #6B778C;
+            margin-top: 4px;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #6B778C;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .spinner {
+            width: 24px;
+            height: 24px;
+            border: 2px solid #DFE1E6;
+            border-top-color: #0052CC;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 12px;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="macro-container">
+        <div class="macro-header">
+            <span>📊</span>
+            <h2 class="macro-title">Meeting Cost Summary</h2>
+        </div>
+
+        <div id="loading" class="loading">
+            <div class="spinner"></div>
+            <p>Loading meeting data...</p>
+        </div>
+
+        <div id="content" class="stats-grid hidden">
+            <div class="stat-item">
+                <div class="stat-value" id="total-cost">$0</div>
+                <div class="stat-label">Monthly Cost</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value" id="total-hours">0h</div>
+                <div class="stat-label">Meeting Hours</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value" id="meeting-count">0</div>
+                <div class="stat-label">Meetings</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value" id="avg-cost">$0</div>
+                <div class="stat-label">Avg Cost/Hour</div>
+            </div>
+        </div>
+    </div>
+
+    <script src="bundle.js"></script>
+</body>
+
+</html>

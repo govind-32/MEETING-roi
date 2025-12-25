@@ -1,0 +1,19 @@
+{
+    "name": "dashboard-gadget-ui",
+    "version": "1.0.0",
+    "private": true,
+    "scripts": {
+        "build": "webpack --mode production",
+        "dev": "webpack --mode development --watch"
+    },
+    "dependencies": {
+        "@forge/bridge": "^4.0.1"
+    },
+    "devDependencies": {
+        "@babel/core": "^7.28.5",
+        "@babel/preset-env": "^7.28.5",
+        "babel-loader": "^10.0.0",
+        "webpack": "^5.96.0",
+        "webpack-cli": "^5.1.4"
+    }
+}

@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Configure Gadget</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            padding: 16px;
+            background: #FAFBFC;
+        }
+
+        .form-group {
+            margin-bottom: 16px;
+        }
+
+        label {
+            display: block;
+            font-size: 12px;
+            font-weight: 600;
+            color: #42526E;
+            margin-bottom: 6px;
+        }
+
+        select,
+        input {
+            width: 100%;
+            padding: 8px 12px;
+            border: 2px solid #DFE1E6;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+
+        select:focus,
+        input:focus {
+            outline: none;
+            border-color: #4C9AFF;
+        }
+
+        .hint {
+            font-size: 11px;
+            color: #6B778C;
+            margin-top: 4px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="form-group">
+        <label for="dateRange">Default Date Range</label>
+        <select id="dateRange" name="dateRange">
+            <option value="last-week">Last Week</option>
+            <option value="last-month" selected>Last Month</option>
+            <option value="last-quarter">Last Quarter</option>
+        </select>
+        <p class="hint">Select the default time period for displaying meeting costs</p>
+    </div>
+
+    <div class="form-group">
+        <label for="projectKey">Filter by Project (optional)</label>
+        <input type="text" id="projectKey" name="projectKey" placeholder="e.g., PROJ">
+        <p class="hint">Leave blank to show all meetings</p>
+    </div>
+
+    <script type="module">
+        import { view } from '@forge/bridge';
+
+        // Load saved config
+        view.getContext().then(context => {
+            const config = context.extension?.gadgetConfiguration || {};
+            if (config.dateRange) {
+                document.getElementById('dateRange').value = config.dateRange;
+            }
+            if (config.projectKey) {
+                document.getElementById('projectKey').value = config.projectKey;
+            }
+        });
+
+        // Save config on change
+        document.querySelectorAll('select, input').forEach(el => {
+            el.addEventListener('change', () => {
+                view.submit({
+                    dateRange: document.getElementById('dateRange').value,
+                    projectKey: document.getElementById('projectKey').value
+                });
+            });
+        });
+    </script>
+</body>
+
+</html>

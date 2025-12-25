@@ -1,0 +1,490 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MeetingROI Settings</title>
+    <style>
+        :root {
+            --primary: #0052CC;
+            --primary-dark: #0747A6;
+            --primary-light: #DEEBFF;
+            --success: #00875A;
+            --warning: #FF991F;
+            --neutral-10: #FAFBFC;
+            --neutral-20: #F4F5F7;
+            --neutral-30: #EBECF0;
+            --neutral-40: #DFE1E6;
+            --neutral-100: #7A869A;
+            --neutral-200: #6B778C;
+            --neutral-500: #42526E;
+            --neutral-800: #172B4D;
+            --shadow-sm: 0 1px 2px rgba(9, 30, 66, 0.08);
+            --shadow-md: 0 4px 8px rgba(9, 30, 66, 0.12);
+            --radius-sm: 4px;
+            --radius-md: 8px;
+            --radius-lg: 12px;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
+            background: var(--neutral-10);
+            color: var(--neutral-800);
+            line-height: 1.5;
+            padding: 32px;
+        }
+
+        .config-container {
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        .page-header {
+            margin-bottom: 32px;
+        }
+
+        .page-title {
+            font-size: 28px;
+            font-weight: 600;
+            color: var(--neutral-800);
+            margin-bottom: 8px;
+        }
+
+        .page-subtitle {
+            color: var(--neutral-200);
+            font-size: 15px;
+        }
+
+        .cards-container {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 24px;
+        }
+
+        @media (max-width: 768px) {
+            .cards-container {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .card {
+            background: white;
+            border-radius: var(--radius-lg);
+            padding: 24px;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .card-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 8px;
+        }
+
+        .card-icon {
+            width: 36px;
+            height: 36px;
+            border-radius: var(--radius-md);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+        }
+
+        .card-icon.blue {
+            background: var(--primary-light);
+        }
+
+        .card-icon.yellow {
+            background: #FFF7E6;
+        }
+
+        .card-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: var(--neutral-800);
+        }
+
+        .card-description {
+            color: var(--neutral-200);
+            font-size: 13px;
+            margin-bottom: 24px;
+            margin-left: 48px;
+        }
+
+        /* Role Rows */
+        .role-list {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .role-row {
+            display: grid;
+            grid-template-columns: 1fr 150px 40px;
+            gap: 16px;
+            align-items: end;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: var(--neutral-200);
+            margin-bottom: 6px;
+        }
+
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            padding: 10px 12px;
+            border: 2px solid var(--neutral-40);
+            border-radius: var(--radius-sm);
+            font-size: 14px;
+            background: white;
+            transition: border-color 0.2s;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: var(--primary-light);
+        }
+
+        .rate-input-wrapper {
+            position: relative;
+        }
+
+        .rate-input-wrapper::before {
+            content: '$';
+            position: absolute;
+            left: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--neutral-200);
+            font-weight: 500;
+        }
+
+        .rate-input-wrapper input {
+            padding-left: 28px;
+        }
+
+        .btn-delete {
+            background: transparent;
+            border: none;
+            color: var(--neutral-100);
+            cursor: pointer;
+            padding: 10px;
+            border-radius: var(--radius-sm);
+            font-size: 16px;
+            transition: all 0.2s;
+        }
+
+        .btn-delete:hover {
+            background: #FFEBE6;
+            color: #DE350B;
+        }
+
+        .add-role-btn {
+            width: 100%;
+            padding: 14px;
+            border: 2px dashed var(--neutral-40);
+            border-radius: var(--radius-md);
+            background: transparent;
+            color: var(--neutral-200);
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            transition: all 0.2s;
+            margin-top: 16px;
+        }
+
+        .add-role-btn:hover {
+            border-color: var(--primary);
+            color: var(--primary);
+            background: var(--primary-light);
+        }
+
+        /* General Settings */
+        .settings-group {
+            margin-bottom: 20px;
+        }
+
+        .settings-label {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--neutral-500);
+            margin-bottom: 8px;
+        }
+
+        .settings-description {
+            font-size: 12px;
+            color: var(--neutral-100);
+            margin-top: 6px;
+        }
+
+        /* Save Button */
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: var(--radius-sm);
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background 0.2s;
+            margin-top: 16px;
+        }
+
+        .btn-primary:hover {
+            background: var(--primary-dark);
+        }
+
+        .btn-primary:disabled {
+            background: var(--neutral-40);
+            cursor: not-allowed;
+        }
+
+        /* Toast */
+        .toast {
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            background: var(--success);
+            color: white;
+            padding: 12px 20px;
+            border-radius: var(--radius-md);
+            font-size: 14px;
+            font-weight: 500;
+            box-shadow: var(--shadow-md);
+            display: none;
+        }
+
+        .toast.show {
+            display: block;
+            animation: slideIn 0.3s ease;
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateY(20px);
+                opacity: 0;
+            }
+
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: var(--neutral-200);
+        }
+    </style>
+</head>
+
+<body>
+    <div class="config-container">
+        <header class="page-header">
+            <h1 class="page-title">Configuration</h1>
+            <p class="page-subtitle">Manage role-based rates and global settings to ensure your meeting cost
+                calculations are precise.</p>
+        </header>
+
+        <div class="cards-container">
+            <!-- Role Hourly Rates Card -->
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-icon blue">🏢</div>
+                    <h2 class="card-title">Role Hourly Rates</h2>
+                </div>
+                <p class="card-description">Define the standard hourly cost for different roles in your organization.
+                </p>
+
+                <div id="role-list" class="role-list">
+                    <div class="loading">Loading roles...</div>
+                </div>
+
+                <button class="add-role-btn" id="add-role-btn">
+                    <span>+</span> Add New Role
+                </button>
+
+                <button class="btn-primary" id="save-roles-btn">Save Changes</button>
+            </div>
+
+            <!-- General Settings Card -->
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-icon yellow">⚙️</div>
+                    <h2 class="card-title">General</h2>
+                </div>
+                <p class="card-description">Global preferences for calculation.</p>
+
+                <div class="settings-group">
+                    <label class="settings-label">
+                        🌐 Currency
+                    </label>
+                    <select id="currency">
+                        <option value="USD">USD ($) - US Dollar</option>
+                        <option value="EUR">EUR (€) - Euro</option>
+                        <option value="GBP">GBP (£) - British Pound</option>
+                        <option value="INR">INR (₹) - Indian Rupee</option>
+                        <option value="AUD">AUD ($) - Australian Dollar</option>
+                    </select>
+                    <p class="settings-description">Used for all monetary displays.</p>
+                </div>
+
+                <div class="settings-group">
+                    <label class="settings-label">
+                        🕐 Work Hours Per Day
+                    </label>
+                    <input type="number" id="work-hours" min="1" max="24" value="8">
+                    <p class="settings-description">Standard working hours per day (usually 8).</p>
+                </div>
+
+                <button class="btn-primary" id="save-settings-btn">Save Settings</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="toast" id="toast">Saved successfully!</div>
+
+    <script type="module">
+        import { invoke } from '@forge/bridge';
+
+        let roles = [];
+
+        async function init() {
+            await loadRoles();
+            await loadSettings();
+            setupEventListeners();
+        }
+
+        async function loadRoles() {
+            const result = await invoke('getRoleRates');
+            if (result.success) {
+                roles = result.rates;
+                renderRoles();
+            }
+        }
+
+        async function loadSettings() {
+            const result = await invoke('getConfig');
+            if (result.success) {
+                document.getElementById('currency').value = result.settings.currency || 'USD';
+                document.getElementById('work-hours').value = result.settings.workHoursPerDay || 8;
+            }
+        }
+
+        function renderRoles() {
+            const container = document.getElementById('role-list');
+
+            if (roles.length === 0) {
+                container.innerHTML = '<p class="loading">No roles configured yet.</p>';
+                return;
+            }
+
+            container.innerHTML = roles.map((role, index) => `
+        <div class="role-row" data-index="${index}">
+          <div class="form-group">
+            ${index === 0 ? '<label>Role Title</label>' : ''}
+            <input type="text" class="role-name" value="${role.roleName}" placeholder="e.g., Engineer">
+          </div>
+          <div class="form-group">
+            ${index === 0 ? '<label>Hourly Rate</label>' : ''}
+            <div class="rate-input-wrapper">
+              <input type="number" class="role-rate" value="${role.hourlyRate}" min="0" step="5">
+            </div>
+          </div>
+          <button class="btn-delete" onclick="deleteRole(${index})" title="Delete role">🗑️</button>
+        </div>
+      `).join('');
+        }
+
+        window.deleteRole = function (index) {
+            roles.splice(index, 1);
+            renderRoles();
+        }
+
+        function setupEventListeners() {
+            document.getElementById('add-role-btn').addEventListener('click', () => {
+                const newRole = {
+                    roleId: `role-${Date.now()}`,
+                    roleName: '',
+                    hourlyRate: 75,
+                    currency: 'USD'
+                };
+                roles.push(newRole);
+                renderRoles();
+            });
+
+            document.getElementById('save-roles-btn').addEventListener('click', async () => {
+                // Collect role data from inputs
+                const roleRows = document.querySelectorAll('.role-row');
+                const updatedRoles = [];
+
+                roleRows.forEach((row, i) => {
+                    const name = row.querySelector('.role-name').value.trim();
+                    const rate = parseFloat(row.querySelector('.role-rate').value) || 0;
+
+                    if (name) {
+                        updatedRoles.push({
+                            roleId: roles[i]?.roleId || `role-${Date.now()}-${i}`,
+                            roleName: name,
+                            hourlyRate: rate,
+                            currency: document.getElementById('currency').value
+                        });
+                    }
+                });
+
+                const result = await invoke('saveRoleRates', { rates: updatedRoles });
+                if (result.success) {
+                    roles = updatedRoles;
+                    showToast('Roles saved successfully!');
+                }
+            });
+
+            document.getElementById('save-settings-btn').addEventListener('click', async () => {
+                const settings = {
+                    currency: document.getElementById('currency').value,
+                    workHoursPerDay: parseInt(document.getElementById('work-hours').value) || 8
+                };
+
+                const result = await invoke('saveConfig', { settings });
+                if (result.success) {
+                    showToast('Settings saved successfully!');
+                }
+            });
+        }
+
+        function showToast(message) {
+            const toast = document.getElementById('toast');
+            toast.textContent = message;
+            toast.classList.add('show');
+            setTimeout(() => toast.classList.remove('show'), 3000);
+        }
+
+        init();
+    </script>
+</body>
+
+</html>

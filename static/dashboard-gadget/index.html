@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Meeting ROI Dashboard</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+
+<body>
+  <div id="loading" class="loading-overlay">
+    <div class="spinner"></div>
+    <p>Loading meeting data...</p>
+  </div>
+
+  <header class="metrics-header">
+    <div class="metric-card primary">
+      <span class="metric-icon">💰</span>
+      <span class="metric-label">Monthly Meeting Cost</span>
+      <span class="metric-value" id="monthly-cost">$0</span>
+    </div>
+    <div class="metric-card">
+      <span class="metric-icon">⏱️</span>
+      <span class="metric-label">Meeting Hours</span>
+      <span class="metric-value" id="meeting-hours">0h</span>
+    </div>
+    <div class="metric-card">
+      <span class="metric-icon">📊</span>
+      <span class="metric-label">Meetings</span>
+      <span class="metric-value" id="meeting-count">0</span>
+    </div>
+    <div class="metric-card">
+      <span class="metric-icon">⚡</span>
+      <span class="metric-label">Avg Cost/Hour</span>
+      <span class="metric-value" id="cost-per-hour">$0</span>
+    </div>
+  </header>
+
+  <section class="type-breakdown">
+    <h3>🍩 Cost by Meeting Type</h3>
+    <div id="type-bars" class="type-bars">
+      <p class="empty-state">No data yet</p>
+    </div>
+  </section>
+
+  <section class="meetings-section">
+    <div class="section-header">
+      <h3>📋 Recent Meetings</h3>
+      <button id="add-meeting-btn" class="btn-primary">+ Log Meeting</button>
+    </div>
+    <div id="meetings-list" class="meetings-list">
+      <p class="empty-state">No meetings logged yet. Click "Log Meeting" to add one.</p>
+    </div>
+  </section>
+
+  <div id="add-meeting-modal" class="modal hidden">
+    <div class="modal-backdrop"></div>
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2>📅 Log Meeting</h2>
+        <button class="close-btn" id="close-modal">&times;</button>
+      </div>
+      <form id="meeting-form">
+        <div class="form-group">
+          <label for="title">Meeting Title</label>
+          <input type="text" id="title" name="title" placeholder="e.g., Sprint Planning" required>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label for="date">Date</label>
+            <input type="date" id="date" name="date" required>
+          </div>
+          <div class="form-group">
+            <label for="duration">Duration (minutes)</label>
+            <input type="number" id="duration" name="duration" min="5" max="480" value="30" required>
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="meetingType">Meeting Type</label>
+          <select id="meetingType" name="meetingType">
+            <option value="standup">Daily Standup</option>
+            <option value="planning">Sprint Planning</option>
+            <option value="retro">Retrospective</option>
+            <option value="review">Sprint Review</option>
+            <option value="one-on-one">1:1 Meeting</option>
+            <option value="team-sync">Team Sync</option>
+            <option value="all-hands">All Hands</option>
+            <option value="interview">Interview</option>
+            <option value="ad-hoc" selected>Ad-hoc</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Attendees (select roles)</label>
+          <div id="attendee-roles" class="role-checkboxes"></div>
+        </div>
+        <div class="form-group">
+          <label for="attendeeCount">Or enter attendee count</label>
+          <input type="number" id="attendeeCount" name="attendeeCount" min="1" max="100"
+            placeholder="Number of attendees">
+        </div>
+        <div class="cost-preview">
+          <span>Estimated Cost: </span>
+          <strong id="estimated-cost">$0</strong>
+        </div>
+        <div class="form-actions">
+          <button type="button" class="btn-secondary" id="cancel-btn">Cancel</button>
+          <button type="submit" class="btn-primary">Save Meeting</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script type="module">
+    import { invoke } from '@forge/bridge';
+
+    let roleRates = [];
+
+    async function init() {
+      console.log('Dashboard initializing...');
+      try {
+        await loadRoleRates();
+        await loadDashboardStats();
+        await loadRecentMeetings();
+        setupEventListeners();
+        hideLoading();
+        console.log('Dashboard ready');
+      } catch (error) {
+        console.error('Error initializing dashboard:', error);
+        hideLoading();
+      }
+    }
+
+    async function loadRoleRates() {
+      try {
+        const result = await invoke('getRoleRates');
+        console.log('getRoleRates:', result);
+        if (result && result.success) {
+          roleRates = result.rates || [];
+          populateRoleCheckboxes();
+        }
+      } catch (e) {
+        console.error('loadRoleRates error:', e);
+        roleRates = [
+          { roleId: 'engineer', roleName: 'Engineer', hourlyRate: 75 },
+          { roleId: 'senior', roleName: 'Senior Engineer', hourlyRate: 100 },
+          { roleId: 'pm', roleName: 'Product Manager', hourlyRate: 90 }
+        ];
+        populateRoleCheckboxes();
+      }
+    }
+
+    async function loadDashboardStats() {
+      try {
+        const result = await invoke('getDashboardStats', { dateRange: 'last-month' });
+        console.log('getDashboardStats:', result);
+        if (result && result.success && result.stats) {
+          const s = result.stats;
+          document.getElementById('monthly-cost').textContent = formatCurrency(s.totalCost || 0);
+          document.getElementById('meeting-hours').textContent = (s.totalHours || 0).toFixed(1) + 'h';
+          document.getElementById('meeting-count').textContent = s.meetingCount || 0;
+          document.getElementById('cost-per-hour').textContent = formatCurrency(s.totalHours > 0 ? s.totalCost / s.totalHours : 0);
+          renderTypeBreakdown(s.costByType || {});
+        }
+      } catch (e) {
+        console.error('loadDashboardStats error:', e);
+      }
+    }
+
+    function renderTypeBreakdown(costByType) {
+      const container = document.getElementById('type-bars');
+      if (!costByType || Object.keys(costByType).length === 0) {
+        container.innerHTML = '<p class="empty-state">No data yet</p>';
+        return;
+      }
+      const maxCost = Math.max(...Object.values(costByType).map(t => t.cost || 0));
+      const colors = { standup: '#00875A', planning: '#0052CC', retro: '#6554C0', review: '#FF991F', 'one-on-one': '#00B8D9', 'team-sync': '#36B37E', 'ad-hoc': '#97A0AF', 'all-hands': '#FF5630', interview: '#8777D9' };
+      container.innerHTML = Object.entries(costByType).sort((a, b) => b[1].cost - a[1].cost).map(([type, data]) => {
+        const pct = maxCost > 0 ? (data.cost / maxCost) * 100 : 0;
+        return '<div class="type-bar-item"><div class="type-bar-label"><span class="type-name">' + formatType(type) + '</span><span class="type-cost">' + formatCurrency(data.cost) + '</span></div><div class="type-bar-track"><div class="type-bar-fill" style="width:' + pct + '%;background:' + (colors[type] || '#6B778C') + '"></div></div><div class="type-bar-meta">' + data.count + ' meetings · ' + data.hours.toFixed(1) + 'h</div></div>';
+      }).join('');
+    }
+
+    async function loadRecentMeetings() {
+      try {
+        const result = await invoke('getMeetings', { limit: 10 });
+        console.log('getMeetings:', result);
+        const list = document.getElementById('meetings-list');
+        if (result && result.success && result.meetings && result.meetings.length > 0) {
+          list.innerHTML = result.meetings.map(function (m) {
+            return '<div class="meeting-item"><div class="meeting-info"><span class="meeting-type-badge">' + formatType(m.meetingType) + '</span><div><div class="meeting-title">' + (m.title || 'Untitled') + '</div><div class="meeting-meta">' + formatDate(m.date) + ' · ' + m.durationMinutes + ' min</div></div></div><div class="meeting-actions"><span class="meeting-cost">' + formatCurrency(m.calculatedCost) + '</span><button class="btn-danger" onclick="window.deleteMeeting(\'' + m.id + '\')">🗑️</button></div></div>';
+          }).join('');
+        } else {
+          list.innerHTML = '<p class="empty-state">No meetings logged yet. Click "Log Meeting" to add one.</p>';
+        }
+      } catch (e) {
+        console.error('loadRecentMeetings error:', e);
+      }
+    }
+
+    window.deleteMeeting = async function (id) {
+      if (confirm('Delete this meeting?')) {
+        await invoke('deleteMeeting', { meetingId: id });
+        await loadDashboardStats();
+        await loadRecentMeetings();
+      }
+    };
+
+    function setupEventListeners() {
+      var modal = document.getElementById('add-meeting-modal');
+      var form = document.getElementById('meeting-form');
+      document.getElementById('add-meeting-btn').addEventListener('click', function () {
+        modal.classList.remove('hidden');
+        document.getElementById('date').valueAsDate = new Date();
+      });
+      document.getElementById('close-modal').addEventListener('click', function () { modal.classList.add('hidden'); });
+      document.getElementById('cancel-btn').addEventListener('click', function () { modal.classList.add('hidden'); });
+      document.querySelector('.modal-backdrop').addEventListener('click', function () { modal.classList.add('hidden'); });
+      form.addEventListener('change', updateCostPreview);
+      form.addEventListener('input', updateCostPreview);
+      form.addEventListener('submit', async function (e) {
+        e.preventDefault();
+        var fd = new FormData(form);
+        var selectedRoles = Array.from(document.querySelectorAll('#attendee-roles input:checked')).map(function (el) { return el.value; });
+        var meeting = {
+          title: fd.get('title'),
+          date: fd.get('date'),
+          durationMinutes: fd.get('duration'),
+          meetingType: fd.get('meetingType'),
+          attendeeRoles: JSON.stringify(selectedRoles),
+          attendeeCount: fd.get('attendeeCount') || selectedRoles.length || 1
+        };
+        console.log('Adding meeting:', meeting);
+        var result = await invoke('addMeeting', meeting);
+        console.log('addMeeting result:', result);
+        if (result && result.success) {
+          modal.classList.add('hidden');
+          form.reset();
+          await loadDashboardStats();
+          await loadRecentMeetings();
+        } else {
+          alert('Failed to save: ' + (result ? result.error : 'Unknown error'));
+        }
+      });
+    }
+
+    function populateRoleCheckboxes() {
+      var c = document.getElementById('attendee-roles');
+      c.innerHTML = roleRates.map(function (r) {
+        return '<label class="role-checkbox"><input type="checkbox" value="' + r.roleId + '">' + r.roleName + ' ($' + r.hourlyRate + '/hr)</label>';
+      }).join('');
+      c.querySelectorAll('input').forEach(function (i) {
+        i.addEventListener('change', function () {
+          i.parentElement.classList.toggle('selected', i.checked);
+          updateCostPreview();
+        });
+      });
+    }
+
+    function updateCostPreview() {
+      var dur = parseInt(document.getElementById('duration').value) || 0;
+      var roles = Array.from(document.querySelectorAll('#attendee-roles input:checked')).map(function (el) { return el.value; });
+      var cnt = parseInt(document.getElementById('attendeeCount').value) || 0;
+      var cost = 0;
+      if (roles.length > 0) {
+        roles.forEach(function (id) { var r = roleRates.find(function (x) { return x.roleId === id; }); if (r) cost += (dur / 60) * r.hourlyRate; });
+      } else if (cnt > 0 && roleRates.length > 0) {
+        var avg = roleRates.reduce(function (s, r) { return s + r.hourlyRate; }, 0) / roleRates.length;
+        cost = (dur / 60) * avg * cnt;
+      }
+      document.getElementById('estimated-cost').textContent = formatCurrency(cost);
+    }
+
+    function formatCurrency(n) { return '$' + Math.round(n || 0).toLocaleString(); }
+    function formatType(t) { var m = { standup: 'Standup', planning: 'Planning', retro: 'Retro', review: 'Review', 'one-on-one': '1:1', 'team-sync': 'Team Sync', 'all-hands': 'All Hands', interview: 'Interview', 'ad-hoc': 'Ad-hoc' }; return m[t] || t || 'Ad-hoc'; }
+    function formatDate(d) { if (!d) return '-'; try { return new Date(d).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }); } catch (e) { return d; } }
+    function hideLoading() { document.getElementById('loading').classList.add('hidden'); }
+
+    init();
+  </script>
+</body>
+
+</html>

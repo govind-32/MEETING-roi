@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="200" height="200" viewBox="0 0 200 200">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#0052CC"/>
+      <stop offset="100%" style="stop-color:#0747A6"/>
+    </linearGradient>
+  </defs>
+  <rect width="200" height="200" rx="16" fill="url(#bg)"/>
+  <text x="100" y="85" text-anchor="middle" fill="white" font-size="48">💰</text>
+  <text x="100" y="130" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-weight="bold" font-size="18">Meeting</text>
+  <text x="100" y="155" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-weight="bold" font-size="18">ROI</text>
+</svg>

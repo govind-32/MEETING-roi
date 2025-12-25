@@ -1,0 +1,29 @@
+{
+  "name": "meeting-roi-dashboard",
+  "version": "1.0.0",
+  "description": "Track meeting costs and correlate with sprint velocity to optimize team productivity",
+  "main": "src/index.js",
+  "scripts": {
+    "lint": "eslint src/**/*.js",
+    "test": "jest"
+  },
+  "dependencies": {
+    "@forge/api": "^4.0.0",
+    "@forge/resolver": "^1.6.0"
+  },
+  "devDependencies": {
+    "@forge/bridge": "^3.0.0"
+  },
+  "keywords": [
+    "atlassian",
+    "forge",
+    "jira",
+    "confluence",
+    "meetings",
+    "productivity",
+    "roi",
+    "analytics"
+  ],
+  "author": "Govind Suthar",
+  "license": "MIT"
+}

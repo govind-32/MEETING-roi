@@ -1,0 +1,112 @@
+modules:
+  # Jira Global Page - Main dashboard (RoA eligible, no thumbnail required)
+  jira:globalPage:
+    - key: meeting-roi-page
+      title: Meeting ROI Dashboard
+      resource: dashboardGadget
+      resolver:
+        function: resolver
+
+  # Admin Configuration Page
+  jira:adminPage:
+    - key: meeting-roi-admin
+      title: MeetingROI Settings
+      resource: adminPanel
+      resolver:
+        function: resolver
+
+  # Rovo AI Agent for Meeting Insights
+  rovo:agent:
+    - key: meeting-insights-agent
+      name: Meeting Insights Assistant
+      description: Ask questions about meeting costs, productivity impact, and get optimization suggestions
+      prompt: |
+        You are a meeting productivity analyst for this organization. 
+        You help users understand:
+        - How much meetings cost their team in dollars and hours
+        - Which meeting types correlate with lower sprint velocity
+        - Suggestions to reduce meeting overhead and improve productivity
+        
+        Always be data-driven and provide specific numbers when available.
+        If asked about trends, use historical data from the getMeetingCostSummary action.
+        When discussing velocity impact, use the getVelocityCorrelation action.
+      actions:
+        - action-get-meeting-cost
+        - action-get-velocity
+        - action-suggest-optimizations
+
+  # Rovo Actions
+  action:
+    - key: action-get-meeting-cost
+      name: Get Meeting Cost Summary
+      function: getMeetingCostSummary
+      actionVerb: GET
+      description: Get total meeting cost for a team or time period
+      inputs:
+        projectKey:
+          title: Jira Project Key
+          description: The Jira project key to filter meetings by
+          type: string
+          required: false
+        dateRange:
+          title: Date Range
+          description: Time period for the summary (last-week, last-month, last-quarter)
+          type: string
+          required: false
+
+    - key: action-get-velocity
+      name: Get Velocity Correlation
+      function: getVelocityCorrelation
+      actionVerb: GET
+      description: Analyze correlation between meeting hours and sprint velocity
+      inputs:
+        projectKey:
+          title: Jira Project Key
+          description: The Jira project key to analyze velocity for
+          type: string
+          required: true
+
+    - key: action-suggest-optimizations
+      name: Suggest Meeting Optimizations
+      function: suggestOptimizations
+      actionVerb: GET
+      description: Get AI-powered suggestions to optimize meeting culture
+      inputs:
+        projectKey:
+          title: Jira Project Key
+          description: Optional project key to get project-specific suggestions
+          type: string
+          required: false
+
+  # Forge Functions
+  function:
+    - key: resolver
+      handler: index.resolver
+    - key: getMeetingCostSummary
+      handler: index.getMeetingCostSummary
+    - key: getVelocityCorrelation
+      handler: index.getVelocityCorrelation
+    - key: suggestOptimizations
+      handler: index.suggestOptimizations
+
+resources:
+  - key: dashboardGadget
+    path: static/dashboard-gadget/build
+  - key: adminPanel
+    path: static/admin-panel/build
+  - key: confluenceMacro
+    path: static/confluence-macro/build
+
+permissions:
+  scopes:
+    - read:jira-work
+    - read:jira-user
+    - read:confluence-content.summary
+    - storage:app
+
+app:
+  runtime:
+    name: nodejs22.x
+    memoryMB: 256
+    architecture: arm64
+  id: 

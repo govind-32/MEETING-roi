@@ -1,0 +1,15 @@
+{
+    "name": "admin-panel-ui",
+    "version": "1.0.0",
+    "private": true,
+    "scripts": {
+        "build": "webpack --mode production"
+    },
+    "dependencies": {
+        "@forge/bridge": "^4.0.1"
+    },
+    "devDependencies": {
+        "webpack": "^5.96.0",
+        "webpack-cli": "^5.1.4"
+    }
+}

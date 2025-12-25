@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Meeting Cost Summary</title>
+    <style>
+        :root {
+            --primary: #0052CC;
+            --success: #00875A;
+            --warning: #FF991F;
+            --danger: #DE350B;
+            --neutral-10: #FAFBFC;
+            --neutral-30: #EBECF0;
+            --neutral-200: #6B778C;
+            --neutral-800: #172B4D;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            color: var(--neutral-800);
+            line-height: 1.5;
+        }
+
+        .summary-container {
+            background: linear-gradient(135deg, var(--neutral-10), white);
+            border: 1px solid var(--neutral-30);
+            border-radius: 8px;
+            padding: 20px;
+            max-width: 400px;
+        }
+
+        .summary-header {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 16px;
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--neutral-200);
+        }
+
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+
+        .metric {
+            text-align: center;
+            padding: 12px;
+            background: white;
+            border-radius: 6px;
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+        }
+
+        .metric-value {
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--primary);
+        }
+
+        .metric-label {
+            font-size: 11px;
+            color: var(--neutral-200);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .trend-indicator {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 4px;
+            padding: 8px;
+            background: white;
+            border-radius: 6px;
+            font-size: 13px;
+        }
+
+        .trend-indicator.up {
+            color: var(--danger);
+        }
+
+        .trend-indicator.down {
+            color: var(--success);
+        }
+
+        .loading {
+            text-align: center;
+            padding: 24px;
+            color: var(--neutral-200);
+        }
+    </style>
+</head>
+
+<body>
+    <div class="summary-container">
+        <div class="summary-header">
+            💰 Meeting Cost Summary (This Month)
+        </div>
+
+        <div id="content">
+            <div class="loading">Loading...</div>
+        </div>
+    </div>
+
+    <script type="module">
+        import { invoke } from '@forge/bridge';
+
+        async function loadSummary() {
+            const contentEl = document.getElementById('content');
+
+            try {
+                const result = await invoke('getDashboardStats', { dateRange: 'last-month' });
+
+                if (result.success) {
+                    const { stats } = result;
+
+                    const trendClass = stats.trendPercentage > 0 ? 'up' : 'down';
+                    const trendIcon = stats.trendPercentage > 0 ? '📈' : '📉';
+                    const trendText = stats.trendPercentage > 0 ? 'increase' : 'decrease';
+
+                    contentEl.innerHTML = `
+            <div class="metrics-grid">
+              <div class="metric">
+                <div class="metric-value">${formatCurrency(stats.totalCost)}</div>
+                <div class="metric-label">Total Cost</div>
+              </div>
+              <div class="metric">
+                <div class="metric-value">${stats.totalHours.toFixed(1)}h</div>
+                <div class="metric-label">Hours</div>
+              </div>
+              <div class="metric">
+                <div class="metric-value">${stats.meetingCount}</div>
+                <div class="metric-label">Meetings</div>
+              </div>
+              <div class="metric">
+                <div class="metric-value">${formatCurrency(stats.totalHours > 0 ? stats.totalCost / stats.totalHours : 0)}</div>
+                <div class="metric-label">Cost/Hour</div>
+              </div>
+            </div>
+            <div class="trend-indicator ${trendClass}">
+              ${trendIcon} ${Math.abs(stats.trendPercentage).toFixed(1)}% ${trendText} vs last period
+            </div>
+          `;
+                } else {
+                    contentEl.innerHTML = '<p style="color: var(--neutral-200); text-align: center;">No meeting data available</p>';
+                }
+            } catch (error) {
+                console.error('Error loading summary:', error);
+                contentEl.innerHTML = '<p style="color: var(--danger); text-align: center;">Failed to load data</p>';
+            }
+        }
+
+        function formatCurrency(amount) {
+            return new Intl.NumberFormat('en-US', {
+                style: 'currency',
+                currency: 'USD',
+                minimumFractionDigits: 0,
+                maximumFractionDigits: 0
+            }).format(amount);
+        }
+
+        loadSummary();
+    </script>
+</body>
+
+</html>
