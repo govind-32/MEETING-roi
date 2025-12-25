@@ -20,6 +20,14 @@ Meeting ROI Dashboard is a productivity analytics tool that answers the question
 | **⚙️ Configurable Rates** | Set custom hourly rates for different roles (Engineer, PM, Manager, etc.) |
 | **📈 Trend Analysis** | Track month-over-month trends to see if meeting hygiene is improving |
 
+### 📸 Screenshots
+
+#### Dashboard
+![Meeting ROI Dashboard](screenshots/dashboard.png)
+
+#### Admin Settings
+![Admin Settings - Role Configuration](screenshots/admin-settings.png)
+
 ---
 
 ## 🤔 Why Use Meeting ROI Dashboard?
